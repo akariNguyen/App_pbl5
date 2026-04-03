@@ -33,6 +33,44 @@ class ClassifierRepository {
     return ClassifyResponse.fromJson(json);
   }
 
+  Future<File> detectAndCropImage(File imageFile) async {
+    final uri = Uri.parse('$kServerUrl/detect?conf_thres=0.25&iou_thres=0.45');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.files.add(
+      await http.MultipartFile.fromPath('file', imageFile.path),
+    );
+
+    final streamed = await request.send().timeout(
+      const Duration(seconds: 45),
+      onTimeout: () => throw Exception(
+        'Server detect không phản hồi (timeout 45s)\nKiểm tra kết nối internet hoặc trạng thái Raspberry Pi.',
+      ),
+    );
+
+    final body = await streamed.stream.bytesToString();
+
+    if (streamed.statusCode != 200) {
+      throw Exception('Lỗi detect ${streamed.statusCode}: $body');
+    }
+
+    final json = jsonDecode(body) as Map<String, dynamic>;
+    final croppedBase64 = json['cropped_image_base64'] as String?;
+
+    if (croppedBase64 == null || croppedBase64.isEmpty) {
+      throw Exception('Server không trả về ảnh đã crop.');
+    }
+
+    final bytes = base64Decode(croppedBase64);
+
+    final tempFile = File(
+      '${Directory.systemTemp.path}/orchid_detect_${DateTime.now().millisecondsSinceEpoch}.jpg',
+    );
+
+    await tempFile.writeAsBytes(bytes, flush: true);
+    return tempFile;
+  }
+
   Future<String?> loadOrchidInfoByClassId(int classId) async {
     try {
       final fileName =

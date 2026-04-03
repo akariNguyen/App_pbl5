@@ -83,8 +83,7 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: null,
           response: null,
           orchidInfo: null,
-          errorMessage:
-              'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
+          errorMessage: 'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
           isLoading: false,
           clearError: false,
         ),
@@ -105,12 +104,10 @@ class ClassifierCubit extends Cubit<ClassifierState> {
             statusBarColor: const Color(0xFF111827),
             backgroundColor: Colors.black,
             activeControlsWidgetColor: const Color(0xFFFFC107),
-            
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false,
             hideBottomControls: false,
           ),
-
           IOSUiSettings(
             title: 'Cắt ảnh',
             aspectRatioLockEnabled: false,
@@ -147,6 +144,65 @@ class ClassifierCubit extends Cubit<ClassifierState> {
       emit(
         state.copyWith(
           errorMessage: 'Lỗi không xác định khi cắt ảnh.',
+          clearError: false,
+        ),
+      );
+    }
+  }
+
+  Future<void> detectCurrentImage() async {
+    final currentImage = state.imageFile;
+
+    if (currentImage == null) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Chưa có ảnh để detect.',
+          clearError: false,
+        ),
+      );
+      return;
+    }
+
+    if (!await currentImage.exists()) {
+      emit(
+        state.copyWith(
+          imageFile: null,
+          response: null,
+          orchidInfo: null,
+          errorMessage: 'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
+          isLoading: false,
+          clearError: false,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        isLoading: true,
+        response: null,
+        orchidInfo: null,
+        errorMessage: null,
+      ),
+    );
+
+    try {
+      final detectedFile = await repository.detectAndCropImage(currentImage);
+
+      emit(
+        state.copyWith(
+          imageFile: detectedFile,
+          response: null,
+          orchidInfo: null,
+          errorMessage: null,
+          isLoading: false,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
           clearError: false,
         ),
       );

@@ -44,6 +44,9 @@ class ClassifierPage extends StatelessWidget {
                     onEdit: state.imageFile != null && !state.isLoading
                         ? () => context.read<ClassifierCubit>().cropCurrentImage()
                         : null,
+                    onDetect: state.imageFile != null && !state.isLoading
+                        ? () => context.read<ClassifierCubit>().detectCurrentImage()
+                        : null,
                   ),
                   const SizedBox(height: 16),
 
