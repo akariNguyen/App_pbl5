@@ -4,6 +4,7 @@ class ClassifierState extends Equatable {
   final File? imageFile;
   final ClassifyResponse? response;
   final String? orchidInfo;
+  final List<String> exampleImages;
   final bool isLoading;
   final String? errorMessage;
 
@@ -11,6 +12,7 @@ class ClassifierState extends Equatable {
     this.imageFile,
     this.response,
     this.orchidInfo,
+    this.exampleImages = const [],
     this.isLoading = false,
     this.errorMessage,
   });
@@ -19,18 +21,18 @@ class ClassifierState extends Equatable {
     File? imageFile,
     ClassifyResponse? response,
     String? orchidInfo,
+    List<String>? exampleImages,
     bool? isLoading,
     String? errorMessage,
-    bool clearError = true,
+    bool clearError = false,
   }) {
     return ClassifierState(
       imageFile: imageFile ?? this.imageFile,
       response: response,
       orchidInfo: orchidInfo,
+      exampleImages: exampleImages ?? this.exampleImages,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: clearError
-          ? (errorMessage ?? this.errorMessage)
-          : errorMessage,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
@@ -39,6 +41,7 @@ class ClassifierState extends Equatable {
     imageFile?.path,
     response,
     orchidInfo,
+    exampleImages,
     isLoading,
     errorMessage,
   ];

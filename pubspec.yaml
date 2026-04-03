@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   flutter_markdown: ^0.7.3
@@ -35,3 +37,48 @@ flutter:
   uses-material-design: true
   assets:
     - lib/classifier/data/infor/
+    - lib/classifier/data/category/class0000/
+    - lib/classifier/data/category/class0001/
+    - lib/classifier/data/category/class0002/
+    - lib/classifier/data/category/class0003/
+    - lib/classifier/data/category/class0004/
+    - lib/classifier/data/category/class0005/
+    - lib/classifier/data/category/class0006/
+    - lib/classifier/data/category/class0007/
+    - lib/classifier/data/category/class0008/
+    - lib/classifier/data/category/class0009/
+    - lib/classifier/data/category/class0010/
+    - lib/classifier/data/category/class0011/
+    - lib/classifier/data/category/class0012/
+    - lib/classifier/data/category/class0013/
+    - lib/classifier/data/category/class0014/
+    - lib/classifier/data/category/class0015/
+    - lib/classifier/data/category/class0016/
+    - lib/classifier/data/category/class0017/
+    - lib/classifier/data/category/class0018/
+    - lib/classifier/data/category/class0019/
+    - lib/classifier/data/category/class0020/
+    - lib/classifier/data/category/class0021/
+    - lib/classifier/data/category/class0022/
+    - lib/classifier/data/category/class0023/
+    - lib/classifier/data/category/class0024/
+    - lib/classifier/data/category/class0025/
+    - lib/classifier/data/category/class0026/
+    - lib/classifier/data/category/class0027/
+    - lib/classifier/data/category/class0028/
+    - lib/classifier/data/category/class0029/
+    - lib/classifier/data/category/class0030/
+    - lib/classifier/data/category/class0031/
+    - lib/classifier/data/category/class0032/
+    - lib/classifier/data/category/class0033/
+    - lib/classifier/data/category/class0034/
+    - lib/classifier/data/category/class0035/
+    - lib/classifier/data/category/class0036/
+    - lib/classifier/data/category/class0037/
+    - lib/classifier/data/category/class0038/
+    - lib/classifier/data/category/class0039/
+    - lib/classifier/data/category/class0040/
+    - lib/classifier/data/category/class0041/
+    - lib/classifier/data/category/class0042/
+    - lib/classifier/data/category/class0043/
+    - lib/classifier/data/category/class0044/

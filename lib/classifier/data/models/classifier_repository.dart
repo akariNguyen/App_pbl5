@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-
 import '../../../../core/constants/app_constants.dart';
 import '../models/classify_response.dart';
 
@@ -78,6 +78,48 @@ class ClassifierRepository {
       return await rootBundle.loadString(fileName);
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<List<String>> loadExampleImagesByClassId(
+    int classId, {
+    int limit = 5,
+  }) async {
+    try {
+      final classFolder =
+          'lib/classifier/data/category/class${classId.toString().padLeft(4, '0')}/';
+
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final allAssets = manifest.listAssets();
+
+      final imagePaths = allAssets.where((path) {
+        final lower = path.toLowerCase();
+        return path.startsWith(classFolder) &&
+            (lower.endsWith('.png') ||
+                lower.endsWith('.jpg') ||
+                lower.endsWith('.jpeg') ||
+                lower.endsWith('.webp'));
+      }).toList();
+
+      if (imagePaths.isEmpty) {
+        debugPrint('❌ KHÔNG tìm thấy ảnh cho $classFolder');
+        debugPrint('CLASS FOLDER = $classFolder');
+        debugPrint('TOTAL ASSETS = ${allAssets.length}');
+        debugPrint(
+          allAssets
+              .where((e) => e.contains('lib/classifier/data/category'))
+              .join('\n'),
+        );
+        return [];
+      }
+
+      debugPrint('✅ FOUND: $imagePaths');
+
+      imagePaths.shuffle(Random());
+      return imagePaths.take(limit).toList();
+    } catch (e) {
+      debugPrint('🔥 ERROR loadExampleImages: $e');
+      return [];
     }
   }
 }

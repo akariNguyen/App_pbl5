@@ -4,10 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:orchid_classifier/classifier/cubit/classifier_cubit.dart';
 import 'package:orchid_classifier/classifier/widgets/classify_button.dart';
 import 'package:orchid_classifier/classifier/widgets/error_card.dart';
+import 'package:orchid_classifier/classifier/widgets/example_images_card.dart';
 import 'package:orchid_classifier/classifier/widgets/image_preview.dart';
 import 'package:orchid_classifier/classifier/widgets/orchid_info_card.dart';
 import 'package:orchid_classifier/classifier/widgets/pick_buttons.dart';
 import 'package:orchid_classifier/classifier/widgets/result_card.dart';
+import 'package:orchid_classifier/setting/settings_page.dart';
 
 class ClassifierPage extends StatelessWidget {
   const ClassifierPage({super.key});
@@ -23,13 +25,20 @@ class ClassifierPage extends StatelessWidget {
         foregroundColor: scheme.onPrimary,
         title: const Text(
           'Orchid Classifier',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const SettingsPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: BlocBuilder<ClassifierCubit, ClassifierState>(
@@ -49,17 +58,19 @@ class ClassifierPage extends StatelessWidget {
                         : null,
                   ),
                   const SizedBox(height: 16),
-
                   PickButtons(
                     onCamera: () {
-                      context.read<ClassifierCubit>().pickImage(ImageSource.camera);
+                      context.read<ClassifierCubit>().pickImage(
+                        ImageSource.camera,
+                      );
                     },
                     onGallery: () {
-                      context.read<ClassifierCubit>().pickImage(ImageSource.gallery);
+                      context.read<ClassifierCubit>().pickImage(
+                        ImageSource.gallery,
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
-
                   ClassifyButton(
                     enabled: state.imageFile != null && !state.isLoading,
                     loading: state.isLoading,
@@ -68,12 +79,17 @@ class ClassifierPage extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 20),
-
                   if (state.errorMessage != null)
                     ErrorCard(message: state.errorMessage!),
-
                   if (state.response != null) ...[
                     ResultCard(response: state.response!),
+                    if (state.exampleImages.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      ExampleImagesCard(
+                        title: state.response!.topClass,
+                        imagePaths: state.exampleImages,
+                      ),
+                    ],
                     if (state.orchidInfo != null) ...[
                       const SizedBox(height: 12),
                       OrchidInfoCard(

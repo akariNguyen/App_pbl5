@@ -45,8 +45,10 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: file,
           response: null,
           orchidInfo: null,
+          exampleImages: const [],
           errorMessage: null,
           isLoading: false,
+          clearError: true,
         ),
       );
     } on Exception catch (e) {
@@ -83,7 +85,8 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: null,
           response: null,
           orchidInfo: null,
-          errorMessage: 'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
+          errorMessage:
+              'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
           isLoading: false,
           clearError: false,
         ),
@@ -128,8 +131,10 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: croppedFile,
           response: null,
           orchidInfo: null,
+          exampleImages: const [],
           errorMessage: null,
           isLoading: false,
+          clearError: true,
         ),
       );
     } on Exception catch (e) {
@@ -169,7 +174,8 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: null,
           response: null,
           orchidInfo: null,
-          errorMessage: 'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
+          errorMessage:
+              'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
           isLoading: false,
           clearError: false,
         ),
@@ -182,7 +188,9 @@ class ClassifierCubit extends Cubit<ClassifierState> {
         isLoading: true,
         response: null,
         orchidInfo: null,
+        exampleImages: const [],
         errorMessage: null,
+        clearError: true,
       ),
     );
 
@@ -194,8 +202,10 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           imageFile: detectedFile,
           response: null,
           orchidInfo: null,
+          exampleImages: const [],
           errorMessage: null,
           isLoading: false,
+          clearError: true,
         ),
       );
     } catch (e) {
@@ -232,7 +242,9 @@ class ClassifierCubit extends Cubit<ClassifierState> {
         isLoading: true,
         response: null,
         orchidInfo: null,
+        exampleImages: const [],
         errorMessage: null,
+        clearError: true,
       ),
     );
 
@@ -247,12 +259,18 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           ? await repository.loadOrchidInfoByClassId(topClassId)
           : null;
 
+      final exampleImages = topClassId >= 0
+          ? await repository.loadExampleImagesByClassId(topClassId, limit: 5)
+          : <String>[];
+
       emit(
         state.copyWith(
           isLoading: false,
           response: response,
           orchidInfo: info,
+          exampleImages: exampleImages,
           errorMessage: null,
+          clearError: true,
         ),
       );
     } catch (e) {
@@ -267,6 +285,6 @@ class ClassifierCubit extends Cubit<ClassifierState> {
   }
 
   void clearError() {
-    emit(state.copyWith(errorMessage: null));
+    emit(state.copyWith(clearError: true));
   }
 }
