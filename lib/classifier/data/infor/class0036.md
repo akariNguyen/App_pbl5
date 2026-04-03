@@ -1,0 +1,6 @@
+Lan Mantanghong là một loài lan Cymbidium ensifolium hoa đỏ quý hiếm trong số các loài lan bốn mùa. Loài lan này có nguồn gốc từ núi Emei, tỉnh Tứ Xuyên và được cho là do những người đam mê lan ở Hồng Kông đặt tên, mặc dù điều này chưa được kiểm chứng. Lan Mantanghong có lá cao, rộng với hình dáng tổng thể hài hòa. Đầu lá cong mạnh về phía ngọn, và cánh hoa có những sọc đỏ rực rỡ, uốn lượn với các mảng sáng tối xen kẽ. Khi cây con khỏe mạnh, hoa nở theo hình dáng ôm trọn (hơi giống hoa sen). Hoa có màu đỏ và tỏa hương thơm nồng nàn. Dưới ánh nắng mạnh, hoa càng đỏ hơn, một đặc điểm độc đáo giúp phân biệt Mantanghong với các loài lan khác. Mantanghong phát triển tốt nhất dưới ánh nắng mặt trời đầy đủ, tạo ra sự phát triển nhanh chóng nhưng cũng khiến cây con già héo nhanh. Cây trồng dưới ánh nắng dồi dào sẽ thấp hơn rõ rệt, lá dày hơn và màu hoa đẹp hơn. Thiếu ánh nắng sẽ dẫn đến hoa nhạt màu, kém rực rỡ hơn.Mantanghong chắc chắn là một giống lan quý hiếm và xuất sắc trong số các giống lan Cymbidium ensifolium truyền thống. Nó được mọi người yêu thích bởi hình dáng, màu sắc, hương thơm và các đặc tính khác.
+
+
+
+[Thông tin chi tiết](https://baike.baidu.com/tashuo/browse/content?id=c852d198405378a2e416068b)
+
