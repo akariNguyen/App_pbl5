@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:orchid_classifier/category/category_page.dart';
+import 'package:orchid_classifier/category/page/category_page.dart';
 import 'package:orchid_classifier/classifier/page/classifier_page.dart';
 
 class MainNavigationPage extends StatefulWidget {

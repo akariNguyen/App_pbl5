@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:orchid_classifier/classifier/cubit/classifier_cubit.dart';
 import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
 import 'package:orchid_classifier/classifier/page/classifier_page.dart';
+import 'package:orchid_classifier/history/data/history_repository.dart';
 
 import 'core/theme/app_theme.dart';
 
@@ -20,6 +21,7 @@ class OrchidApp extends StatelessWidget {
           return BlocProvider(
             create: (_) => ClassifierCubit(
               repository: context.read<ClassifierRepository>(),
+              historyRepository: context.read<HistoryRepository>(),
             ),
             child: MaterialApp(
               title: 'Orchid Classifier',

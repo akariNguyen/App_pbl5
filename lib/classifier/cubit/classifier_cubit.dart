@@ -6,15 +6,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
+import 'package:orchid_classifier/history/data/history_repository.dart';
 
 import '../data/models/classify_response.dart';
 
 part 'classifier_state.dart';
 
 class ClassifierCubit extends Cubit<ClassifierState> {
-  ClassifierCubit({required this.repository}) : super(const ClassifierState());
+  ClassifierCubit({required this.repository, required this.historyRepository})
+    : super(const ClassifierState());
 
   final ClassifierRepository repository;
+  final HistoryRepository historyRepository;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> pickImage(ImageSource source) async {
@@ -262,7 +265,24 @@ class ClassifierCubit extends Cubit<ClassifierState> {
       final exampleImages = topClassId >= 0
           ? await repository.loadExampleImagesByClassId(topClassId, limit: 5)
           : <String>[];
+      if (response.results.isNotEmpty && imageFile.existsSync()) {
+        final top = response.results.first;
 
+        await historyRepository.saveHistoryItem(
+          sourceImageFile: imageFile,
+          className: top.className,
+          classId: top.classId,
+          confidence: top.confidence,
+
+          // thêm mấy field này để HistoryDetailPage có dữ liệu
+          vietnameseName: top.className,
+          scientificName: top.className,
+          family: 'Orchidaceae',
+          overview: info,
+          identification: info,
+          careGuide: info,
+        );
+      }
       emit(
         state.copyWith(
           isLoading: false,

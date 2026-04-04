@@ -6,6 +6,7 @@ import 'package:orchid_classifier/core/language/language_cubit.dart';
 import 'package:orchid_classifier/core/theme/app_theme.dart';
 import 'package:orchid_classifier/core/theme/theme_cubit.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:orchid_classifier/history/data/history_repository.dart';
 import 'package:orchid_classifier/home/main_navigation_page.dart';
 
 Future<void> main() async {
@@ -37,7 +38,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<ThemeCubit>.value(value: themeCubit),
         BlocProvider<LanguageCubit>.value(value: languageCubit),
         BlocProvider(
-          create: (_) => ClassifierCubit(repository: ClassifierRepository()),
+          create: (_) => ClassifierCubit(
+            repository: ClassifierRepository(),
+            historyRepository: HistoryRepository(),
+          ),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
