@@ -1,11 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:orchid_classifier/classifier/data/models/class_result.dart';
 import 'package:orchid_classifier/classifier/data/models/classify_response.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ResultCard extends StatelessWidget {
   final ClassifyResponse response;
+  final File? imageFile;
 
-  const ResultCard({super.key, required this.response});
+  const ResultCard({
+    super.key,
+    required this.response,
+    this.imageFile,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +30,25 @@ class ResultCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _TopResult(response: response),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _TopResult(response: response)),
+              if (imageFile != null)
+                IconButton(
+                  icon: Icon(Icons.ios_share, color: scheme.primary),
+                  onPressed: () async {
+                    final text = 'Tôi vừa nhận diện giống lan ${response.topClass} '
+                        'với độ chính xác ${(response.topConfidence * 100).toStringAsFixed(1)}% '
+                        'bằng ứng dụng Orchid Classifier. Các bác xem thử có chuẩn không nhé!';
+                    await Share.shareXFiles(
+                      [XFile(imageFile!.path)],
+                      text: text,
+                    );
+                  },
+                ),
+            ],
+          ),
           const SizedBox(height: 16),
           Divider(color: scheme.outlineVariant),
           const SizedBox(height: 12),
@@ -194,6 +221,101 @@ class _ConfidenceBar extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ResultCardShimmer extends StatelessWidget {
+  const ResultCardShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final baseColor = scheme.surfaceContainerHighest;
+    final highlightColor = scheme.surfaceContainerHigh;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: scheme.outlineVariant),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Shimmer.fromColors(
+        baseColor: baseColor,
+        highlightColor: highlightColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        height: 24,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 6),
+                      Container(
+                        width: 100,
+                        height: 16,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Divider(color: scheme.outlineVariant),
+            const SizedBox(height: 12),
+            Container(width: 120, height: 16, color: Colors.white),
+            const SizedBox(height: 10),
+            for (int i = 0; i < 3; i++) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Container(
+                    width: 22,
+                    height: 22,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(height: 14, color: Colors.white),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(width: 40, height: 14, color: Colors.white),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Container(
+                width: double.infinity,
+                height: 7,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ part of 'classifier_cubit.dart';
 
 class ClassifierState extends Equatable {
   final File? imageFile;
+  final String? cropId;
   final ClassifyResponse? response;
   final String? orchidInfo;
   final List<String> exampleImages;
@@ -10,6 +11,7 @@ class ClassifierState extends Equatable {
 
   const ClassifierState({
     this.imageFile,
+    this.cropId,
     this.response,
     this.orchidInfo,
     this.exampleImages = const [],
@@ -19,15 +21,18 @@ class ClassifierState extends Equatable {
 
   ClassifierState copyWith({
     File? imageFile,
+    String? cropId,
     ClassifyResponse? response,
     String? orchidInfo,
     List<String>? exampleImages,
     bool? isLoading,
     String? errorMessage,
     bool clearError = false,
+    bool clearCropId = false,
   }) {
     return ClassifierState(
       imageFile: imageFile ?? this.imageFile,
+      cropId: clearCropId ? null : (cropId ?? this.cropId),
       response: response,
       orchidInfo: orchidInfo,
       exampleImages: exampleImages ?? this.exampleImages,
@@ -39,6 +44,7 @@ class ClassifierState extends Equatable {
   @override
   List<Object?> get props => [
     imageFile?.path,
+    cropId,
     response,
     orchidInfo,
     exampleImages,

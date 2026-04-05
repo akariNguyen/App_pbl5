@@ -1,1 +1,1 @@
-const String kServerUrl = 'http://192.168.2.155:8000';
+const String kServerUrl = 'http://10.95.73.210:8000';

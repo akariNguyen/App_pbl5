@@ -50,11 +50,9 @@ class ClassifierPage extends StatelessWidget {
                 children: [
                   ImagePreview(
                     imageFile: state.imageFile,
+                    isAnalyzing: state.isLoading,
                     onEdit: state.imageFile != null && !state.isLoading
                         ? () => context.read<ClassifierCubit>().cropCurrentImage()
-                        : null,
-                    onDetect: state.imageFile != null && !state.isLoading
-                        ? () => context.read<ClassifierCubit>().detectCurrentImage()
                         : null,
                   ),
                   const SizedBox(height: 16),
@@ -71,18 +69,88 @@ class ClassifierPage extends StatelessWidget {
                     },
                   ),
                   const SizedBox(height: 12),
-                  ClassifyButton(
-                    enabled: state.imageFile != null && !state.isLoading,
-                    loading: state.isLoading,
-                    onPressed: () {
-                      context.read<ClassifierCubit>().classify();
-                    },
-                  ),
+                  if (state.imageFile != null) ...[
+                    // Nút 1: Detect & Classify (Làm tất cả mọi thứ)
+                    FilledButton.icon(
+                      onPressed: state.isLoading
+                          ? null
+                          : () => context
+                              .read<ClassifierCubit>()
+                              .detectAndClassifyCurrentImage(),
+                      icon: state.isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.auto_awesome),
+                      label:
+                          Text(state.isLoading ? 'Đang xử lý...' : 'Nhận dạng Thần Tốc (Detect & Classify)'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: Colors.amber.shade700,
+                        foregroundColor: Colors.white,
+                        textStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        // Nút 2: Detect (Cắt ảnh)
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: state.isLoading
+                                ? null
+                                : () => context
+                                    .read<ClassifierCubit>()
+                                    .detectCurrentImage(),
+                            icon: const Icon(Icons.center_focus_strong),
+                            label: const Text('Khoanh vùng hoa'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(color: scheme.primary, width: 2),
+                              foregroundColor: scheme.primary,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Nút 3: Classify (Phân loại từ ảnh gốc hoặc crop)
+                        Expanded(
+                          child: FilledButton.icon(
+                            onPressed: state.isLoading
+                                ? null
+                                : () => context
+                                    .read<ClassifierCubit>()
+                                    .classify(),
+                            icon: const Icon(Icons.search),
+                            label: Text(state.cropId != null
+                                ? 'Phân loại (Crop)'
+                                : 'Phân loại (Gốc)'),
+                            style: FilledButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 20),
                   if (state.errorMessage != null)
                     ErrorCard(message: state.errorMessage!),
-                  if (state.response != null) ...[
-                    ResultCard(response: state.response!),
+                  if (state.isLoading && state.imageFile != null) ...[
+                    const ResultCardShimmer(),
+                  ] else if (state.response != null) ...[
+                    ResultCard(
+                      response: state.response!,
+                      imageFile: state.imageFile,
+                    ),
                     if (state.exampleImages.isNotEmpty) ...[
                       const SizedBox(height: 12),
                       ExampleImagesCard(

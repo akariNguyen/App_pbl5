@@ -2,22 +2,68 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-class ImagePreview extends StatelessWidget {
+class ImagePreview extends StatefulWidget {
   final File? imageFile;
   final VoidCallback? onEdit;
-  final VoidCallback? onDetect;
+  final bool isAnalyzing;
 
   const ImagePreview({
     super.key,
     required this.imageFile,
     this.onEdit,
-    this.onDetect,
+    this.isAnalyzing = false,
   });
+
+  @override
+  State<ImagePreview> createState() => _ImagePreviewState();
+}
+
+class _ImagePreviewState extends State<ImagePreview>
+    with TickerProviderStateMixin {
+  late AnimationController _scanController;
+  late AnimationController _rotateController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scanController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    _rotateController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    );
+
+    if (widget.isAnalyzing) {
+      _scanController.repeat(reverse: true);
+      _rotateController.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ImagePreview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isAnalyzing && !oldWidget.isAnalyzing) {
+      _scanController.repeat(reverse: true);
+      _rotateController.repeat();
+    } else if (!widget.isAnalyzing && oldWidget.isAnalyzing) {
+      _scanController.stop();
+      _rotateController.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scanController.dispose();
+    _rotateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final hasImage = imageFile != null && imageFile!.existsSync();
+    final hasImage = widget.imageFile != null && widget.imageFile!.existsSync();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 28),
@@ -34,13 +80,17 @@ class ImagePreview extends StatelessWidget {
               border: Border.all(color: scheme.outlineVariant),
             ),
             clipBehavior: Clip.hardEdge,
-            child: hasImage
-                ? Image.file(
-                    imageFile!,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                if (hasImage)
+                  Image.file(
+                    widget.imageFile!,
                     fit: BoxFit.cover,
                     width: double.infinity,
                   )
-                : Column(
+                else
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(
@@ -58,9 +108,67 @@ class ImagePreview extends StatelessWidget {
                       ),
                     ],
                   ),
-          ),
 
-          if (hasImage)
+                // AI Loading Overlay
+                if (widget.isAnalyzing && hasImage)
+                  Positioned.fill(
+                    child: Container(
+                      color: Colors.black.withOpacity(0.55),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          RotationTransition(
+                            turns: _rotateController,
+                            child: const Icon(
+                              Icons.camera,
+                              size: 48,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Analyzing with AI...',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // Scanning Line
+                if (widget.isAnalyzing && hasImage)
+                  AnimatedBuilder(
+                    animation: _scanController,
+                    builder: (context, child) {
+                      return Positioned(
+                        top: _scanController.value * 280,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 4,
+                          decoration: BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: scheme.primary.withOpacity(0.6),
+                                blurRadius: 10,
+                                spreadRadius: 2,
+                              )
+                            ],
+                            color: scheme.primary,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+          if (hasImage && !widget.isAnalyzing)
             Positioned(
               bottom: -20,
               left: 16,
@@ -69,21 +177,11 @@ class ImagePreview extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _ActionChipButton(
-                      label: 'Sửa ảnh',
+                      label: 'Sửa ảnh (Cắt thủ công)',
                       icon: Icons.crop,
                       backgroundColor: scheme.primary,
                       foregroundColor: scheme.onPrimary,
-                      onTap: onEdit,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _ActionChipButton(
-                      label: 'Detect',
-                      icon: Icons.center_focus_strong,
-                      backgroundColor: scheme.secondary,
-                      foregroundColor: scheme.onSecondary,
-                      onTap: onDetect,
+                      onTap: widget.onEdit,
                     ),
                   ),
                 ],

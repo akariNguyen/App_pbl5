@@ -52,6 +52,7 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           errorMessage: null,
           isLoading: false,
           clearError: true,
+          clearCropId: true,
         ),
       );
     } on Exception catch (e) {
@@ -138,6 +139,7 @@ class ClassifierCubit extends Cubit<ClassifierState> {
           errorMessage: null,
           isLoading: false,
           clearError: true,
+          clearCropId: true,
         ),
       );
     } on Exception catch (e) {
@@ -198,11 +200,12 @@ class ClassifierCubit extends Cubit<ClassifierState> {
     );
 
     try {
-      final detectedFile = await repository.detectAndCropImage(currentImage);
+      final resultMap = await repository.detectAndCropImage(currentImage);
 
       emit(
         state.copyWith(
-          imageFile: detectedFile,
+          imageFile: resultMap['file'] as File,
+          cropId: resultMap['crop_id'] as String?,
           response: null,
           orchidInfo: null,
           exampleImages: const [],
@@ -252,7 +255,9 @@ class ClassifierCubit extends Cubit<ClassifierState> {
     );
 
     try {
-      final response = await repository.classifyImage(imageFile);
+      final response = await repository.classifyImage(
+          imageFile: state.cropId == null ? imageFile : null,
+          cropId: state.cropId);
 
       final topClassId = response.results.isNotEmpty
           ? response.results.first.classId
@@ -306,5 +311,104 @@ class ClassifierCubit extends Cubit<ClassifierState> {
 
   void clearError() {
     emit(state.copyWith(clearError: true));
+  }
+
+  Future<void> detectAndClassifyCurrentImage() async {
+    final currentImage = state.imageFile;
+
+    if (currentImage == null) {
+      emit(
+        state.copyWith(
+          errorMessage: 'Chưa có ảnh để detect và phân loại.',
+          clearError: false,
+        ),
+      );
+      return;
+    }
+
+    if (!await currentImage.exists()) {
+      emit(
+        state.copyWith(
+          imageFile: null,
+          response: null,
+          orchidInfo: null,
+          errorMessage:
+              'Ảnh hiện tại không còn tồn tại. Vui lòng chọn lại ảnh.',
+          isLoading: false,
+          clearError: false,
+          clearCropId: true,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        isLoading: true,
+        response: null,
+        orchidInfo: null,
+        exampleImages: const [],
+        errorMessage: null,
+        clearError: true,
+      ),
+    );
+
+    try {
+      final resultMap = await repository.detectAndClassify(currentImage);
+      final croppedFile = resultMap['file'] as File;
+      final cropId = resultMap['crop_id'] as String?;
+      final response = resultMap['response'] as ClassifyResponse;
+
+      final topClassId = response.results.isNotEmpty
+          ? response.results.first.classId
+          : -1;
+
+      final info = topClassId >= 0
+          ? await repository.loadOrchidInfoByClassId(topClassId)
+          : null;
+
+      final exampleImages = topClassId >= 0
+          ? await repository.loadExampleImagesByClassId(topClassId, limit: 5)
+          : <String>[];
+
+      if (response.results.isNotEmpty && croppedFile.existsSync()) {
+        final top = response.results.first;
+
+        await historyRepository.saveHistoryItem(
+          sourceImageFile: croppedFile,
+          className: top.className,
+          classId: top.classId,
+          confidence: top.confidence,
+
+          vietnameseName: top.className,
+          scientificName: top.className,
+          family: 'Orchidaceae',
+          overview: info,
+          identification: info,
+          careGuide: info,
+        );
+      }
+
+      emit(
+        state.copyWith(
+          isLoading: false,
+          imageFile: croppedFile,
+          cropId: cropId,
+          response: response,
+          orchidInfo: info,
+          exampleImages: exampleImages,
+          errorMessage: null,
+          clearError: true,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: e.toString().replaceFirst('Exception: ', ''),
+          clearError: false,
+        ),
+      );
+    }
   }
 }
