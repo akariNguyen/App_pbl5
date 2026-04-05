@@ -44,8 +44,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
+      child: BlocBuilder<ThemeCubit, String>(
+        builder: (context, themeName) {
+          final themeMode = (themeName == 'dark' || themeName == 'silver') 
+              ? ThemeMode.dark 
+              : ThemeMode.light;
+
           return BlocBuilder<LanguageCubit, Locale>(
             builder: (context, locale) {
               return MaterialApp(

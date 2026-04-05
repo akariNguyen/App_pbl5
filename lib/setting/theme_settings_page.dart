@@ -5,25 +5,39 @@ import 'package:orchid_classifier/core/theme/theme_cubit.dart';
 class ThemeSettingsPage extends StatelessWidget {
   const ThemeSettingsPage({super.key});
 
-  String _themeLabel(ThemeMode mode) {
+  static const List<String> _themes = ['dark', 'light', 'pink', 'red', 'silver'];
+
+  String _themeLabel(String mode) {
     switch (mode) {
-      case ThemeMode.system:
-        return 'System';
-      case ThemeMode.light:
-        return 'Light';
-      case ThemeMode.dark:
-        return 'Dark';
+      case 'light':
+        return 'Sáng (Light)';
+      case 'dark':
+        return 'Tối (Klassic Dark)';
+      case 'pink':
+        return 'Hồng Mộng Mơ (Pink)';
+      case 'red':
+        return 'Đỏ Rực Rỡ (Red)';
+      case 'silver':
+        return 'Bạc Sang Trọng (Silver)';
+      default:
+        return mode;
     }
   }
 
-  IconData _themeIcon(ThemeMode mode) {
+  IconData _themeIcon(String mode) {
     switch (mode) {
-      case ThemeMode.system:
-        return Icons.brightness_auto;
-      case ThemeMode.light:
+      case 'light':
         return Icons.light_mode_outlined;
-      case ThemeMode.dark:
+      case 'dark':
         return Icons.dark_mode_outlined;
+      case 'pink':
+        return Icons.favorite_border_rounded;
+      case 'red':
+        return Icons.local_fire_department_outlined;
+      case 'silver':
+        return Icons.diamond_outlined;
+      default:
+        return Icons.color_lens_outlined;
     }
   }
 
@@ -33,11 +47,11 @@ class ThemeSettingsPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Theme'),
+        title: const Text('Theme / Giao diện'),
         backgroundColor: scheme.primary,
         foregroundColor: scheme.onPrimary,
       ),
-      body: BlocBuilder<ThemeCubit, ThemeMode>(
+      body: BlocBuilder<ThemeCubit, String>(
         builder: (context, currentMode) {
           return ListView(
             padding: const EdgeInsets.all(16),
@@ -49,14 +63,16 @@ class ThemeSettingsPage extends StatelessWidget {
                   border: Border.all(color: scheme.outlineVariant),
                 ),
                 child: Column(
-                  children: ThemeMode.values.map((mode) {
+                  children: _themes.map((mode) {
                     final selected = currentMode == mode;
 
                     return Column(
                       children: [
                         ListTile(
-                          leading: Icon(_themeIcon(mode)),
-                          title: Text(_themeLabel(mode)),
+                          leading: Icon(_themeIcon(mode), color: selected ? scheme.primary : null),
+                          title: Text(_themeLabel(mode), style: TextStyle(
+                            fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                          )),
                           trailing: selected
                               ? Icon(Icons.check, color: scheme.primary)
                               : null,
@@ -64,7 +80,7 @@ class ThemeSettingsPage extends StatelessWidget {
                             await context.read<ThemeCubit>().setTheme(mode);
                           },
                         ),
-                        if (mode != ThemeMode.values.last)
+                        if (mode != _themes.last)
                           Divider(height: 1, color: scheme.outlineVariant),
                       ],
                     );
