@@ -4,17 +4,12 @@ import 'full_image_page.dart';
 class ImageGridTab extends StatelessWidget {
   final List<String> images;
 
-  const ImageGridTab({
-    super.key,
-    required this.images,
-  });
+  const ImageGridTab({super.key, required this.images});
 
   @override
   Widget build(BuildContext context) {
     if (images.isEmpty) {
-      return const Center(
-        child: Text('Không có ảnh'),
-      );
+      return const Center(child: Text('Không có ảnh'));
     }
 
     return GridView.builder(
@@ -45,10 +40,7 @@ class ImageGridTab extends StatelessWidget {
             tag: imagePath,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-              ),
+              child: Image.network(imagePath, fit: BoxFit.cover),
             ),
           ),
         );

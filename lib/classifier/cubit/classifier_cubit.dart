@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
+import 'package:orchid_classifier/classifier/models/classifier_repository.dart';
 import 'package:orchid_classifier/history/data/history_repository.dart';
 
-import '../data/models/classify_response.dart';
+import '../models/classify_response.dart';
 
 part 'classifier_state.dart';
 

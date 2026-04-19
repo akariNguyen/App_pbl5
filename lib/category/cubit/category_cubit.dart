@@ -1,28 +1,24 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
+import 'package:orchid_classifier/core/constants/app_constants.dart';
 import 'package:orchid_classifier/history/data/history_repository.dart';
 import 'package:orchid_classifier/history/models/history_item.dart';
 
 part 'category_state.dart';
 
 class CategoryCubit extends Cubit<CategoryState> {
-  CategoryCubit({required this.historyRepository}) : super(_initialState());
+  CategoryCubit({
+    required this.historyRepository,
+  }) : super(const CategoryState());
 
   final HistoryRepository historyRepository;
 
-  static CategoryState _initialState() {
-    final categories = List.generate(45, (index) {
-      final id = 'class${index.toString().padLeft(4, '0')}';
-      return {'id': id, 'name': id};
-    });
-
-    return CategoryState(allCategories: categories);
-  }
-
   Future<void> init() async {
-    await loadCoverImages();
+    await loadCategories();
     await loadCaptureHistory();
   }
 
@@ -48,39 +44,65 @@ class CategoryCubit extends Cubit<CategoryState> {
   }
 
   void backToCategoryList() {
-    emit(state.copyWith(clearSelectedClass: true, isLoadingClassDetail: false));
+    emit(
+      state.copyWith(
+        clearSelectedClass: true,
+        isLoadingClassDetail: false,
+      ),
+    );
   }
 
-  Future<void> loadCoverImages() async {
+  Future<void> loadCategories() async {
     emit(state.copyWith(isLoading: true));
 
     try {
-      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-      final allAssets = manifest.listAssets();
+      final uri = Uri.parse('$kServerUrl/categories');
+      final response = await http.get(uri);
 
-      final Map<String, String> foundCovers = {};
+      if (response.statusCode != 200) {
+        throw Exception('Load categories thất bại: ${response.statusCode}');
+      }
 
-      for (final item in state.allCategories) {
-        final classId = item['id']!;
-        final folder = 'lib/classifier/data/category/$classId/';
+      final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
+      final rawList = (jsonData['categories'] as List<dynamic>? ?? []);
 
-        final images = allAssets.where((path) {
-          final lower = path.toLowerCase();
-          return path.startsWith(folder) &&
-              (lower.endsWith('.png') ||
-                  lower.endsWith('.jpg') ||
-                  lower.endsWith('.jpeg') ||
-                  lower.endsWith('.webp'));
-        }).toList()..sort();
+      final categories = rawList.map<Map<String, String>>((e) {
+        final item = e as Map<String, dynamic>;
 
-        if (images.isNotEmpty) {
-          foundCovers[classId] = images.first;
+        final id = (item['id'] ?? '').toString();
+        final name = (item['name'] ?? id).toString();
+
+        return {
+          'id': id,
+          'name': name,
+          'specie_name': (item['specie_name'] ?? '').toString(),
+          'cultivar_chinese_name':
+              (item['cultivar_chinese_name'] ?? '').toString(),
+          'specie_chinese_name':
+              (item['specie_chinese_name'] ?? '').toString(),
+        };
+      }).toList();
+
+      final Map<String, String> coverImages = {};
+      for (final e in rawList) {
+        final item = e as Map<String, dynamic>;
+        final id = (item['id'] ?? '').toString();
+        final cover = item['cover_image']?.toString();
+
+        if (id.isNotEmpty && cover != null && cover.isNotEmpty) {
+          coverImages[id] = cover;
         }
       }
 
-      emit(state.copyWith(coverImages: foundCovers, isLoading: false));
+      emit(
+        state.copyWith(
+          allCategories: categories,
+          coverImages: coverImages,
+          isLoading: false,
+        ),
+      );
     } catch (e) {
-      debugPrint('Lỗi load cover images: $e');
+      debugPrint('Lỗi load categories từ server: $e');
       emit(state.copyWith(isLoading: false));
     }
   }
@@ -100,40 +122,32 @@ class CategoryCubit extends Cubit<CategoryState> {
     );
 
     try {
-      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
-      final allAssets = manifest.listAssets();
+      final uri = Uri.parse('$kServerUrl/categories/$classId');
+      final response = await http.get(uri);
 
-      final folder = 'lib/classifier/data/category/$classId/';
-
-      final images = allAssets.where((path) {
-        final lower = path.toLowerCase();
-        return path.startsWith(folder) &&
-            (lower.endsWith('.png') ||
-                lower.endsWith('.jpg') ||
-                lower.endsWith('.jpeg') ||
-                lower.endsWith('.webp'));
-      }).toList()..sort();
-
-      String? info;
-      try {
-        final infoPath = 'lib/classifier/data/infor/$classId.md';
-        debugPrint('Đang load info ở CategoryCubit: $infoPath');
-        info = await rootBundle.loadString(infoPath);
-        debugPrint('Load info thành công cho $classId');
-      } catch (e) {
-        debugPrint('Không load được info cho $classId: $e');
-        info = null;
+      if (response.statusCode != 200) {
+        throw Exception(
+          'Load detail $classId thất bại: ${response.statusCode}',
+        );
       }
+
+      final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      final images = (jsonData['images'] as List<dynamic>? ?? [])
+          .map((e) => e.toString())
+          .toList();
+
+      final info = jsonData['markdown']?.toString();
 
       emit(
         state.copyWith(
-          selectedClassImages: images.take(50).toList(),
+          selectedClassImages: images,
           selectedClassInfo: info,
           isLoadingClassDetail: false,
         ),
       );
     } catch (e) {
-      debugPrint('Lỗi load detail $classId: $e');
+      debugPrint('Lỗi load detail $classId từ server: $e');
       emit(state.copyWith(isLoadingClassDetail: false));
     }
   }

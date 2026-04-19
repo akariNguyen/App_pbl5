@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:orchid_classifier/classifier/cubit/classifier_cubit.dart';
-import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
+import 'package:orchid_classifier/classifier/models/classifier_repository.dart';
 import 'package:orchid_classifier/core/language/language_cubit.dart';
 import 'package:orchid_classifier/core/theme/app_theme.dart';
 import 'package:orchid_classifier/core/theme/theme_cubit.dart';

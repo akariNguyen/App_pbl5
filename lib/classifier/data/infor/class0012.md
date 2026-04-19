@@ -1,5 +1,0 @@
-Cui Yipin là một loài thực vật thuộc họ Lan, chi Cymbidium goeringii, đồng thời là một giống lan truyền thống nổi tiếng trong nhóm Cymbidium goeringii. Hoa của nó có hình dạng giống hoa thủy tiên, với ba cánh ngoài có cuống dài, thuôn ở gốc và xòe ra ở các góc. Các cánh trong lõm nhẹ như hình quạt, và môi hoa có những đốm đỏ tươi nổi bật. Cuống hoa mảnh mai, tạo nên tổng thể thanh thoát và tao nhã.
-
-Giống lan này được Wu Enyuan ở Hàng Châu chọn lọc trước năm 1923. Tên gọi "Yipin" bắt nguồn từ cấp bậc cao nhất trong hệ thống quan lại phong kiến, thể hiện sự cao quý và giá trị của giống lan này. Cui Yipin được coi là một giống Cymbidium goeringii cao cấp, được nhiều người chơi lan đánh giá cao về cả hình dáng và giá trị sưu tầm.
-
-[Thông tin chi tiết](https://baike.baidu.com/item/%E7%BF%A0%E4%B8%80%E5%93%81/3257669)

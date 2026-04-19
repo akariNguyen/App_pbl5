@@ -14,7 +14,15 @@ class FullImagePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(title)),
-      body: Center(child: Image.asset(imagePath)),
+      body: Center(
+        child: InteractiveViewer(
+          child: Image.network(
+            imagePath,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.broken_image_outlined),
+          ),
+        ),
+      ),
     );
   }
 }

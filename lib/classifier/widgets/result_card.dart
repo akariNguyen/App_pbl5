@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:orchid_classifier/classifier/data/models/class_result.dart';
-import 'package:orchid_classifier/classifier/data/models/classify_response.dart';
+import 'package:orchid_classifier/classifier/models/class_result.dart';
+import 'package:orchid_classifier/classifier/models/classify_response.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 

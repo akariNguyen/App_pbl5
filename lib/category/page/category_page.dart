@@ -62,7 +62,7 @@ class _CategoryViewState extends State<_CategoryView>
           previous.selectedClassId != current.selectedClassId,
       listener: (context, state) {
         if (state.selectedClassId != null) {
-          _detailTabController.animateTo(1);
+          _detailTabController.animateTo(0);
         } else {
           _detailTabController.animateTo(0);
         }
@@ -302,8 +302,10 @@ class _CategoryViewState extends State<_CategoryView>
       itemBuilder: (context, index) {
         final item = state.filteredHistory[index];
         return HistoryCard(
-          title: item.vietnameseName ?? item.className,
+          title: item.className,
           subtitle: _formatDate(item.createdAt),
+          imagePath: item.imagePath,
+          showDivider: index != state.filteredHistory.length - 1,
           onTap: () {
             Navigator.push(
               context,

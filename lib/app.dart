@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:orchid_classifier/classifier/cubit/classifier_cubit.dart';
-import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
+import 'package:orchid_classifier/classifier/models/classifier_repository.dart';
 import 'package:orchid_classifier/classifier/page/classifier_page.dart';
 import 'package:orchid_classifier/history/data/history_repository.dart';
 
