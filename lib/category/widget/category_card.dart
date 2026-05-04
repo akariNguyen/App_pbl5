@@ -34,8 +34,23 @@ class CategoryCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              if (imagePath != null)
-                Image.asset(imagePath!, fit: BoxFit.cover)
+              if (imagePath != null && imagePath!.isNotEmpty)
+                Image.network(
+                  imagePath!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    color: scheme.surfaceContainerHighest,
+                    child: const Icon(Icons.broken_image_outlined),
+                  ),
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return Container(
+                      color: scheme.surfaceContainerHighest,
+                      alignment: Alignment.center,
+                      child: const CircularProgressIndicator(),
+                    );
+                  },
+                )
               else
                 Container(color: scheme.surfaceContainerHighest),
               Container(
@@ -75,3 +90,4 @@ class CategoryCard extends StatelessWidget {
     );
   }
 }
+// k

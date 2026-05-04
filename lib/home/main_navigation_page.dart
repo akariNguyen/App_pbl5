@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:orchid_classifier/category/page/category_page.dart';
 import 'package:orchid_classifier/classifier/page/classifier_page.dart';
+import 'package:orchid_classifier/statistics/page/statistics_page.dart';
 
 class MainNavigationPage extends StatefulWidget {
   const MainNavigationPage({super.key});
@@ -15,6 +16,7 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
   late final List<Widget> pages = [
     const ClassifierPage(),
     const CategoryPage(),
+    const StatisticsPage(),
   ];
 
   @override
@@ -59,6 +61,11 @@ class _MainNavigationPageState extends State<MainNavigationPage> {
                 icon: Icon(Icons.favorite_border),
                 selectedIcon: Icon(Icons.favorite),
                 label: 'Danh mục',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.bar_chart_outlined),
+                selectedIcon: Icon(Icons.bar_chart_rounded),
+                label: 'Thống kê',
               ),
             ],
           ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:orchid_classifier/classifier/cubit/classifier_cubit.dart';
-import 'package:orchid_classifier/classifier/data/models/classifier_repository.dart';
+import 'package:orchid_classifier/classifier/models/classifier_repository.dart';
 import 'package:orchid_classifier/core/language/language_cubit.dart';
 import 'package:orchid_classifier/core/theme/app_theme.dart';
 import 'package:orchid_classifier/core/theme/theme_cubit.dart';
@@ -44,8 +44,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) {
+      child: BlocBuilder<ThemeCubit, String>(
+        builder: (context, themeName) {
+          final themeMode = (themeName == 'dark' || themeName == 'silver') 
+              ? ThemeMode.dark 
+              : ThemeMode.light;
+
           return BlocBuilder<LanguageCubit, Locale>(
             builder: (context, locale) {
               return MaterialApp(

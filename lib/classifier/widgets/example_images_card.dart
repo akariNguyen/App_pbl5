@@ -53,7 +53,7 @@ class ExampleImagesCard extends StatelessWidget {
                       border: Border.all(color: scheme.outlineVariant),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Image.asset(
+                    child: Image.network(
                       path,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
