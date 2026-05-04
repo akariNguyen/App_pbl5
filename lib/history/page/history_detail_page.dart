@@ -24,6 +24,19 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
     final item = widget.item;
     final file = File(item.imagePath);
 
+    final rawContent =
+        item.overview ?? item.identification ?? item.careGuide ?? '';
+
+    final parsed = _ParsedOrchidInfo.fromMarkdown(rawContent);
+
+    final overviewText = parsed.introduction.isNotEmpty
+        ? parsed.introduction
+        : 'Chưa có thông tin tổng quan.';
+
+    final identificationText = parsed.identification.isNotEmpty
+        ? parsed.identification
+        : 'Chưa có thông tin nhận dạng.';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F8),
       body: Stack(
@@ -35,7 +48,10 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                 pinned: true,
                 backgroundColor: Colors.black,
                 leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new, color: Colors.green),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new,
+                    color: Colors.green,
+                  ),
                   onPressed: () => Navigator.pop(context),
                 ),
                 title: const Text(
@@ -49,18 +65,6 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                       file.existsSync()
                           ? Image.file(file, fit: BoxFit.cover)
                           : Container(color: Colors.grey.shade400),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.12),
-                              Colors.black.withOpacity(0.55),
-                            ],
-                          ),
-                        ),
-                      ),
                       Positioned(
                         left: 22,
                         right: 22,
@@ -78,7 +82,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              item.scientificName ?? 'Cymbidium ensifolium',
+                              item.scientificName ?? parsed.species,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 23,
@@ -87,21 +91,11 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Họ ${item.family ?? 'Orchidaceae'}',
+                              'Họ ${item.family ?? parsed.family}',
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 18,
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                            Wrap(
-                              spacing: 10,
-                              runSpacing: 10,
-                              children: const [
-                                _HeroChip(icon: Icons.eco, text: 'Lan'),
-                                _HeroChip(icon: Icons.thumb_up_alt, text: 'Trung Bình'),
-                                _HeroChip(icon: Icons.wb_sunny_outlined, text: 'Bóng Râm\nMột Phần'),
-                              ],
                             ),
                           ],
                         ),
@@ -112,7 +106,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 120),
+                  padding: const EdgeInsets.fromLTRB(16, 18, 16, 32),
                   child: Column(
                     children: [
                       Container(
@@ -139,45 +133,43 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
                                 onTap: () => setState(() => selectedTab = 1),
                               ),
                             ),
-                            Expanded(
-                              child: _TopActionTab(
-                                selected: selectedTab == 2,
-                                icon: Icons.thumb_up_alt_outlined,
-                                text: 'Hướng dẫn\nchăm sóc',
-                                onTap: () => setState(() => selectedTab = 2),
-                              ),
-                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 22),
+
                       if (selectedTab == 0) ...[
                         _InfoCard(
                           icon: Icons.info,
                           title: 'Giới thiệu',
-                          content: item.overview ??
-                              'Cây thuộc họ Lan, phổ biến trong trang trí nhờ hoa đẹp và mùi hương dễ chịu.',
+                          content: overviewText,
                         ),
                         const SizedBox(height: 22),
                         _ClassificationCard(
-                          scientificName: item.scientificName ?? 'Cymbidium ensifolium',
-                          family: item.family ?? 'Orchidaceae',
+                          division: parsed.division,
+                          order: parsed.order,
+                          family: item.family ?? parsed.family,
+                          genus: parsed.genus,
+                          species: item.scientificName ?? parsed.species,
+                          detailUrl: parsed.detailUrl,
                         ),
                       ],
+
                       if (selectedTab == 1) ...[
                         _InfoCard(
-                          icon: Icons.eco_outlined,
-                          title: 'Nhận dạng',
-                          content: item.identification ??
-                              'Dựa trên hình dáng lá, màu hoa, cấu trúc cánh và đặc điểm tổng thể của cây.',
+                          icon: Icons.local_florist_outlined,
+                          title: 'Đặc điểm hoa',
+                          content: parsed.flower.isNotEmpty
+                              ? parsed.flower
+                              : identificationText,
                         ),
-                      ],
-                      if (selectedTab == 2) ...[
+                        const SizedBox(height: 22),
                         _InfoCard(
-                          icon: Icons.thumb_up_alt_outlined,
-                          title: 'Hướng dẫn chăm sóc',
-                          content: item.careGuide ??
-                              'Đặt cây nơi thoáng, có ánh sáng nhẹ. Tưới vừa phải, tránh úng nước, bón phân định kỳ.',
+                          icon: Icons.eco_outlined,
+                          title: 'Đặc điểm lá',
+                          content: parsed.leaf.isNotEmpty
+                              ? parsed.leaf
+                              : 'Chưa có thông tin đặc điểm lá.',
                         ),
                       ],
                     ],
@@ -186,72 +178,141 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
               ),
             ],
           ),
-          Positioned(
-            left: 16,
-            right: 16,
-            bottom: 24,
-            child: SafeArea(
-              top: false,
-              child: SizedBox(
-                height: 64,
-                child: FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFF5B7C5),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () {},
-                  icon: const Icon(Icons.bookmark_outline),
-                  label: const Text('Lưu cây'),
-                ),
-              ),
-            ),
-          ),
+          
         ],
       ),
     );
   }
 }
 
-class _HeroChip extends StatelessWidget {
-  final IconData icon;
-  final String text;
+class _ParsedOrchidInfo {
+  final String introduction;
+  final String division;
+  final String order;
+  final String family;
+  final String genus;
+  final String species;
+  final String flower;
+  final String leaf;
+  final String detailUrl;
 
-  const _HeroChip({
-    required this.icon,
-    required this.text,
+  const _ParsedOrchidInfo({
+    required this.introduction,
+    required this.division,
+    required this.order,
+    required this.family,
+    required this.genus,
+    required this.species,
+    required this.flower,
+    required this.leaf,
+    required this.detailUrl,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.72),
-        borderRadius: BorderRadius.circular(26),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 19, color: Colors.black),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
+  factory _ParsedOrchidInfo.fromMarkdown(String markdown) {
+    String clean(String value) {
+      return value
+          .replaceAll(RegExp(r'\*\*'), '')
+          .replaceAll(RegExp(r'\*'), '')
+          .replaceAll(RegExp(r'^#+\s*', multiLine: true), '')
+          .replaceAll(RegExp(r'^---$', multiLine: true), '')
+          .trim();
+    }
+
+    String extractBetween(String start, List<String> endMarkers) {
+      final startIndex = markdown.indexOf(start);
+      if (startIndex == -1) return '';
+
+      final contentStart = startIndex + start.length;
+      var endIndex = markdown.length;
+
+      for (final marker in endMarkers) {
+        final index = markdown.indexOf(marker, contentStart);
+        if (index != -1 && index < endIndex) {
+          endIndex = index;
+        }
+      }
+
+      return clean(markdown.substring(contentStart, endIndex));
+    }
+
+    String extractLineValue(String label) {
+      final regex = RegExp(
+        r'-\s*\*\*' + RegExp.escape(label) + r'\*\*\s*:\s*(.+)',
+        caseSensitive: false,
+      );
+      final match = regex.firstMatch(markdown);
+      return clean(match?.group(1) ?? '');
+    }
+
+    String extractDetailUrl() {
+      final regex = RegExp(r'\[Thông tin chi tiết\]\((.*?)\)');
+      final match = regex.firstMatch(markdown);
+      return match?.group(1)?.trim() ?? '';
+    }
+
+    final titleEnd = markdown.indexOf('\n\n');
+    final afterTitle = titleEnd == -1 ? markdown : markdown.substring(titleEnd);
+
+    final introEndCandidates = [
+      '**Phân loại:**',
+      '## 🌸 Đặc điểm hoa',
+      '## Đặc điểm hoa',
+    ];
+
+    var introEnd = afterTitle.length;
+    for (final marker in introEndCandidates) {
+      final index = afterTitle.indexOf(marker);
+      if (index != -1 && index < introEnd) {
+        introEnd = index;
+      }
+    }
+
+    final introduction = clean(afterTitle.substring(0, introEnd));
+
+    final flower = extractBetween(
+      '## 🌸 Đặc điểm hoa',
+      ['## 🌿 Đặc điểm lá', '[Thông tin chi tiết]'],
     );
+
+    final leaf = extractBetween(
+      '## 🌿 Đặc điểm lá',
+      ['[Thông tin chi tiết]'],
+    );
+
+    return _ParsedOrchidInfo(
+      introduction: introduction,
+      division: extractLineValue('Ngành').isNotEmpty
+          ? extractLineValue('Ngành')
+          : 'Angiosperms',
+      order: extractLineValue('Bộ').isNotEmpty
+          ? extractLineValue('Bộ')
+          : 'Asparagales',
+      family: extractLineValue('Họ').isNotEmpty
+          ? extractLineValue('Họ')
+          : 'Orchidaceae',
+      genus:
+          extractLineValue('Chi').isNotEmpty ? extractLineValue('Chi') : 'Cymbidium',
+      species: extractLineValue('Loài').isNotEmpty
+          ? extractLineValue('Loài')
+          : 'Cymbidium goeringii',
+      flower: flower,
+      leaf: leaf,
+      detailUrl: extractDetailUrl(),
+    );
+  }
+
+  String get identification {
+    final parts = <String>[];
+
+    if (flower.isNotEmpty) {
+      parts.add('Đặc điểm hoa\n$flower');
+    }
+
+    if (leaf.isNotEmpty) {
+      parts.add('Đặc điểm lá\n$leaf');
+    }
+
+    return parts.join('\n\n');
   }
 }
 
@@ -271,39 +332,55 @@ class _TopActionTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selectedColor = const Color(0xFFFBE5EA);
+    final primaryColor = const Color(0xFFF06292);
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: selected ? selectedColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: selected ? primaryColor.withOpacity(0.18) : Colors.transparent,
+            width: 1.2,
+          ),
+          
         ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: selected ? const Color(0xFFF1AFC0) : Colors.grey,
-              size: 30,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: selected ? const Color(0xFFF1AFC0) : Colors.grey,
-                fontSize: 15,
-                fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
+          style: TextStyle(
+            color: selected ? primaryColor : Colors.grey,
+            fontSize: 15,
+            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+          ),
+          child: Column(
+            children: [
+              AnimatedScale(
+                scale: selected ? 1.08 : 1.0,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                child: Icon(
+                  icon,
+                  color: selected ? primaryColor : Colors.grey,
+                  size: 28,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 8),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
 class _InfoCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -335,11 +412,13 @@ class _InfoCard extends StatelessWidget {
                 child: Icon(icon, color: const Color(0xFFF1AFC0)),
               ),
               const SizedBox(width: 12),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -348,7 +427,7 @@ class _InfoCard extends StatelessWidget {
           Text(
             content,
             style: const TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               height: 1.6,
             ),
           ),
@@ -359,22 +438,31 @@ class _InfoCard extends StatelessWidget {
 }
 
 class _ClassificationCard extends StatelessWidget {
-  final String scientificName;
+  final String division;
+  final String order;
   final String family;
+  final String genus;
+  final String species;
+  final String detailUrl;
 
   const _ClassificationCard({
-    required this.scientificName,
+    required this.division,
+    required this.order,
     required this.family,
+    required this.genus,
+    required this.species,
+    required this.detailUrl,
   });
 
   @override
   Widget build(BuildContext context) {
     final rows = [
-      ['Giới', 'Plantae'],
-      ['Ngành', 'Tracheophyta'],
-      ['Bộ', 'Asparagales'],
+      ['Ngành', division],
+      ['Bộ', order],
       ['Họ', family],
-      ['Chi', scientificName.split(' ').first],
+      ['Chi', genus],
+      ['Loài', species],
+      if (detailUrl.isNotEmpty) ['Thông tin chi tiết', detailUrl],
     ];
 
     return Container(
@@ -392,7 +480,10 @@ class _ClassificationCard extends StatelessWidget {
               CircleAvatar(
                 radius: 18,
                 backgroundColor: Color(0xFFFBE5EA),
-                child: Icon(Icons.description_outlined, color: Color(0xFFF1AFC0)),
+                child: Icon(
+                  Icons.description_outlined,
+                  color: Color(0xFFF1AFC0),
+                ),
               ),
               SizedBox(width: 12),
               Text(
@@ -418,6 +509,7 @@ class _ClassificationCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
                       width: 120,
@@ -432,9 +524,12 @@ class _ClassificationCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         row[1],
-                        style: const TextStyle(
-                          fontSize: 18,
+                        style: TextStyle(
+                          fontSize: row[0] == 'Thông tin chi tiết' ? 15 : 18,
                           fontWeight: FontWeight.w500,
+                          color: row[0] == 'Thông tin chi tiết'
+                              ? Colors.blue
+                              : Colors.black,
                         ),
                       ),
                     ),
